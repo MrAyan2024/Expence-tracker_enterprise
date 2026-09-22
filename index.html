@@ -8,19 +8,323 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        body { background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%); min-height: 100vh; font-family: 'Segoe UI', sans-serif; }
-        .main-container { padding-top: 40px; padding-bottom: 60px; }
-        .nav-pills .nav-link { color: #1e3c72; font-weight: 600; background: rgba(255, 255, 255, 0.9); margin: 0 5px; border-radius: 8px; }
-        .nav-pills .nav-link.active { background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%); color: white; }
-        .card { border: none; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.15); }
-        .card-header { background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%); color: white; border-radius: 15px 15px 0 0 !important; padding: 15px 20px; }
-        .status-badge { font-size: 0.85rem; padding: 5px 10px; border-radius: 20px; font-weight: 600; }
-        .status-pending_manager { background-color: #fff3cd; color: #856404; }
-        .status-approved_manager { background-color: #d1ecf1; color: #0c5460; }
-        .status-processed { background-color: #d4edda; color: #155724; }
-        .status-rejected { background-color: #f8d7da; color: #721c24; }
-        #authScreen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%); display: flex; justify-content: center; align-items: center; z-index: 9999; }
-        .auth-card { background: white; padding: 40px; border-radius: 15px; width: 100%; max-width: 450px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
+        :root {
+            --primary: #1e3c72;
+            --primary-light: #2a5298;
+            --success: #28a745;
+            --warning: #ffc107;
+            --danger: #dc3545;
+            --info: #17a2b8;
+        }
+        
+        * { box-sizing: border-box; }
+        
+        body {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        /* Auth Screen */
+        #authScreen {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            padding: 20px;
+        }
+
+        .auth-card {
+            background: white;
+            padding: 40px;
+            border-radius: 15px;
+            width: 100%;
+            max-width: 450px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+
+        .auth-tabs {
+            display: flex;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #e9ecef;
+        }
+
+        .auth-tab {
+            flex: 1;
+            text-align: center;
+            padding: 12px;
+            cursor: pointer;
+            color: #6c757d;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .auth-tab.active {
+            color: var(--primary);
+            border-bottom: 3px solid var(--primary);
+        }
+
+        /* Main App */
+        .main-container {
+            padding: 20px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .top-bar {
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 12px;
+            padding: 20px 25px;
+            margin-bottom: 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .brand h1 {
+            color: white;
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin: 0;
+        }
+
+        .brand p {
+            color: rgba(255,255,255,0.7);
+            margin: 5px 0 0 0;
+            font-size: 0.9rem;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .role-badge {
+            background: white;
+            color: var(--primary);
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.85rem;
+        }
+
+        .user-email {
+            color: white;
+            font-weight: 500;
+        }
+
+        .btn-logout {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: 1px solid rgba(255,255,255,0.3);
+            padding: 8px 18px;
+            border-radius: 8px;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+
+        .btn-logout:hover {
+            background: rgba(255,255,255,0.3);
+            color: white;
+        }
+
+        /* Navigation */
+        .nav-pills {
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 12px;
+            padding: 8px;
+            margin-bottom: 25px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+        }
+
+        .nav-pills .nav-link {
+            color: white;
+            font-weight: 600;
+            padding: 10px 20px;
+            border-radius: 8px;
+            transition: all 0.3s;
+        }
+
+        .nav-pills .nav-link:hover {
+            background: rgba(255,255,255,0.2);
+        }
+
+        .nav-pills .nav-link.active {
+            background: white;
+            color: var(--primary);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+
+        /* Cards */
+        .card {
+            border: none;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+
+        .card-header {
+            background: var(--primary);
+            color: white;
+            padding: 18px 25px;
+            font-weight: 600;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .card-body {
+            padding: 25px;
+        }
+
+        /* Form */
+        .form-control, .form-select {
+            border-radius: 8px;
+            padding: 10px 14px;
+            border: 1px solid #dee2e6;
+            font-size: 0.95rem;
+        }
+
+        .form-control:focus, .form-select:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 0.2rem rgba(30, 60, 114, 0.25);
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            border: none;
+            border-radius: 8px;
+            padding: 10px 24px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-light);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(30, 60, 114, 0.4);
+        }
+
+        /* Status Badges */
+        .status-badge {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            display: inline-block;
+        }
+
+        .status-pending_manager { background: #fff3cd; color: #856404; }
+        .status-approved_manager { background: #d1ecf1; color: #0c5460; }
+        .status-processed { background: #d4edda; color: #155724; }
+        .status-rejected { background: #f8d7da; color: #721c24; }
+        .status-on_hold { background: #e2e3e5; color: #383d41; }
+
+        /* Table */
+        .table-responsive {
+            overflow-x: auto;
+        }
+
+        .table {
+            margin: 0;
+            font-size: 0.95rem;
+        }
+
+        .table thead {
+            background: #f8f9fa;
+        }
+
+        .table th {
+            font-weight: 600;
+            color: #495057;
+            white-space: nowrap;
+            padding: 14px;
+        }
+
+        .table td {
+            padding: 14px;
+            vertical-align: middle;
+        }
+
+        /* Summary Cards */
+        .summary-card {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            text-align: center;
+            height: 100%;
+        }
+
+        .summary-card h3 {
+            color: var(--primary);
+            font-size: 2rem;
+            font-weight: 700;
+            margin: 10px 0;
+        }
+
+        .summary-card p {
+            color: #6c757d;
+            margin: 0;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* Action Buttons */
+        .btn-action {
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            margin: 2px;
+        }
+
+        .btn-approve { background: var(--success); color: white; border: none; }
+        .btn-reject { background: var(--danger); color: white; border: none; }
+        .btn-process { background: var(--info); color: white; border: none; }
+        .btn-hold { background: #6c757d; color: white; border: none; }
+
+        .btn-action:hover {
+            opacity: 0.9;
+            transform: translateY(-1px);
+        }
+
+        /* Chart Container */
+        .chart-container {
+            position: relative;
+            height: 300px;
+            width: 100%;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .brand h1 { font-size: 1.4rem; }
+            .top-bar { flex-direction: column; align-items: flex-start; }
+            .user-info { width: 100%; justify-content: space-between; }
+            .card-body { padding: 15px; }
+            .nav-pills .nav-link { padding: 8px 14px; font-size: 0.9rem; }
+        }
+
+        @media (max-width: 576px) {
+            .main-container { padding: 10px; }
+            .auth-card { padding: 25px; }
+            .brand h1 { font-size: 1.2rem; }
+        }
     </style>
 </head>
 <body>
@@ -28,17 +332,18 @@
     <!-- AUTHENTICATION SCREEN -->
     <div id="authScreen">
         <div class="auth-card">
-            <h3 class="text-center mb-4" style="color: #1e3c72;"><i class="fas fa-building me-2"></i>Enterprise Expense</h3>
-            <div class="d-flex mb-3 border-bottom">
-                <div class="flex-fill text-center pb-2 border-bottom border-3 border-primary" id="tabLogin" style="cursor:pointer; font-weight:bold; color:#1e3c72;" onclick="window.switchAuthTab('login')">Login</div>
-                <div class="flex-fill text-center pb-2" id="tabSignup" style="cursor:pointer; color:#6c757d;" onclick="window.switchAuthTab('signup')">Sign Up</div>
+            <h3 class="text-center mb-4" style="color: var(--primary);">
+                <i class="fas fa-building me-2"></i>Enterprise Expense
+            </h3>
+            <div class="auth-tabs">
+                <div class="auth-tab active" id="tabLogin" onclick="window.switchAuthTab('login')">Login</div>
+                <div class="auth-tab" id="tabSignup" onclick="window.switchAuthTab('signup')">Sign Up</div>
             </div>
             
             <div id="loginForm">
                 <input type="email" id="loginEmail" class="form-control mb-3" placeholder="Email Address">
                 <input type="password" id="loginPassword" class="form-control mb-3" placeholder="Password">
-                <button class="btn btn-primary w-100" style="background: #1e3c72; border:none;" onclick="window.loginUser()">Login</button>
-                <p class="text-muted small mt-2 text-center">For demo: Use roles like 'admin', 'manager', 'accounts', 'mis' during signup.</p>
+                <button class="btn btn-primary w-100" onclick="window.loginUser()">Login</button>
             </div>
 
             <div id="signupForm" style="display: none;">
@@ -51,74 +356,102 @@
                     <option value="accounts">Accounts (Processor)</option>
                     <option value="admin">Admin/Boss (View All)</option>
                 </select>
-                <button class="btn btn-primary w-100" style="background: #1e3c72; border:none;" onclick="window.signupUser()">Create Account</button>
-           3</div>
+                <button class="btn btn-primary w-100" onclick="window.signupUser()">Create Account</button>
+            </div>
             <p id="authError" class="text-danger text-center mt-3 mb-0" style="display: none; font-size: 0.9rem;"></p>
         </div>
     </div>
 
     <!-- MAIN APP -->
-    <div class="container main-container" id="mainApp" style="display: none;">
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <div>
-                <h1 class="text-white display-6 fw-bold mb-0"><i class="fas fa-building me-2"></i>Enterprise Expense Tracker</h1>
-                <p class="text-white-50 mb-0">Developed by Ayan Paul</p>
+    <div class="main-container" id="mainApp" style="display: none;">
+        <!-- Top Bar -->
+        <div class="top-bar">
+            <div class="brand">
+                <h1><i class="fas fa-building me-2"></i>Enterprise Expense Tracker</h1>
+                <p>Developed by Ayan Paul</p>
             </div>
-            <div class="text-end">
-                <span class="badge bg-light text-dark me-2" id="userRoleDisplay">Role: -</span>
-                <button class="btn btn-outline-light btn-sm" onclick="window.logoutUser()"><i class="fas fa-sign-out-alt me-1"></i> Logout</button
+            <div class="user-info">
+                <span class="role-badge" id="userRoleDisplay">Role: -</span>
+                <span class="user-email" id="userEmailDisplay">-</span>
+                <button class="btn-logout" onclick="window.logoutUser()">
+                    <i class="fas fa-sign-out-alt me-1"></i> Logout
+                </button>
             </div>
         </div>
-        <p class="text-white-50 text-center mb-4">Logged in as: <span id="userEmailDisplay" class="fw-bold text-white"></span></p>
 
-        <!-- Tab Navigation -->
-        <ul class="nav nav-pills mb-4 justify-content-center" id="pills-tab" role="tablist">
-            <li class="nav-item"><button class="nav-link active" data-bs-toggle="pill" data-bs-target="#pills-home">Home</button></li>
-            <li class="nav-item admin-only" style="display:none;"><button class="nav-link" data-bs-toggle="pill" data-bs-target="#pills-admin">Admin Dashboard</button></li>
+        <!-- Navigation -->
+        <ul class="nav nav-pills" id="pills-tab" role="tablist">
+            <li class="nav-item">
+                <button class="nav-link active" data-bs-toggle="pill" data-bs-target="#pills-home">
+                    <i class="fas fa-home me-2"></i>Home
+                </button>
+            </li>
+            <li class="nav-item admin-only" style="display:none;">
+                <button class="nav-link" data-bs-toggle="pill" data-bs-target="#pills-admin">
+                    <i class="fas fa-chart-line me-2"></i>Admin Dashboard
+                </button>
+            </li>
+            <li class="nav-item accounts-only" style="display:none;">
+                <button class="nav-link" data-bs-toggle="pill" data-bs-target="#pills-accounts">
+                    <i class="fas fa-money-check-alt me-2"></i>Accounts Portal
+                </button>
+            </li>
         </ul>
 
         <div class="tab-content" id="pills-tabContent">
             <!-- HOME TAB -->
             <div class="tab-pane fade show active" id="pills-home">
                 <div class="row g-4">
-                    <!-- Left Column: Form & Table -->
+                    <!-- Left Column -->
                     <div class="col-lg-8">
-                        <!-- Add Expense Form (Only for MIS) -->
-                        <div class="card mb-4 mis-only" style="display:none;">
-                            <div class="card-header"><h5 class="mb-0"><i class="fas fa-plus-circle me-2"></i>Add New Expense</h5></div>
+                        <!-- Add Expense Form (MIS Only) -->
+                        <div class="card mis-only" style="display:none;">
+                            <div class="card-header">
+                                <h5 class="mb-0"><i class="fas fa-plus-circle me-2"></i>Add New Expense</h5>
+                            </div>
                             <div class="card-body">
                                 <form id="expenseForm">
-                                    <div class="row g-2">
-                                        <div class="col-md-3">
+                                    <div class="row g-3">
+                                        <div class="col-md-3 col-sm-6">
+                                            <label class="form-label small">Date</label>
                                             <input type="date" class="form-control" id="date" required>
                                         </div>
-                                        <div class="col-md-3">
+                                        <div class="col-md-3 col-sm-6">
+                                            <label class="form-label small">Employee</label>
                                             <select class="form-select" id="employeeName" required>
                                                 <option value="">Select Employee</option>
                                                 <option value="John Doe">John Doe</option>
                                                 <option value="Jane Smith">Jane Smith</option>
                                                 <option value="Ayan Paul">Ayan Paul</option>
+                                                <option value="Rahul Kumar">Rahul Kumar</option>
+                                                <option value="Priya Sharma">Priya Sharma</option>
                                             </select>
                                         </div>
-                                        <div class="col-md-3">
+                                        <div class="col-md-3 col-sm-6">
+                                            <label class="form-label small">Category</label>
                                             <select class="form-select" id="category" required>
                                                 <option value="">Category</option>
                                                 <option value="Travel">Travel</option>
                                                 <option value="Food">Food</option>
                                                 <option value="Office Supplies">Office Supplies</option>
                                                 <option value="Software">Software</option>
+                                                <option value="Training">Training</option>
+                                                <option value="Miscellaneous">Miscellaneous</option>
                                             </select>
                                         </div>
-                                        <div class="col-md-3">
-                                            <input type="number" class="form-control" id="amount" placeholder="Amount (₹)" step="0.01" required>
-                                        </div3</div>
-                                    <div class="row g-2 mt-1">
-                                        <div class="col-md-12">
-                                            <input type="text" class="form-control" id="description" placeholder="Description / Purpose of Expense" required>
+                                        <div class="col-md-3 col-sm-6">
+                                            <label class="form-label small">Amount (₹)</label>
+                                            <input type="number" class="form-control" id="amount" placeholder="0.00" step="0.01" required>
+                                        </div>
+                                        <div class="col-12">
+                                            <label class="form-label small">Description</label>
+                                            <input type="text" class="form-control" id="description" placeholder="Purpose of expense" required>
                                         </div>
                                     </div>
-                                    <div class="text-end mt-3">
-                                        <button type="submit" class="btn btn-primary" id="submitBtn" style="background: #1e3c72; border:none;"><i class="fas fa-plus me-1"></i> Submit Expense</button>
+                                    <div class="text-end mt-4">
+                                        <button type="submit" class="btn btn-primary" id="submitBtn">
+                                            <i class="fas fa-plus me-1"></i> Submit Expense
+                                        </button>
                                     </div>
                                 </form>
                             </div>
@@ -126,13 +459,13 @@
 
                         <!-- Expenses Table -->
                         <div class="card">
-                            <div class="card-header d-flex justify-content-between align-items-center">
+                            <div class="card-header">
                                 <h5 class="mb-0"><i class="fas fa-list-alt me-2"></i>Expense Requests</h5>
                             </div>
                             <div class="card-body p-0">
                                 <div class="table-responsive">
                                     <table class="table table-hover mb-0">
-                                        <thead class="table-light">
+                                        <thead>
                                             <tr>
                                                 <th>Date</th>
                                                 <th>Employee</th>
@@ -145,20 +478,24 @@
                                         <tbody id="expenseTableBody"></tbody>
                                     </table>
                                 </div>
-                                <div id="noExpenses" class="text-center text-muted py-5">
-                                    <i class="fas fa-inbox fa-3x mb-3 text-secondary"></i>
+                                <div id="noExpenses" class="text-center text-muted py-5" style="display:none;">
+                                    <i class="fas fa-inbox fa-3x mb-3"></i>
                                     <p>No expenses found.</p>
                                 </div>
-            </div>
+                            </div>
                         </div>
                     </div>
 
                     <!-- Right Column: Chart -->
                     <div class="col-lg-4">
                         <div class="card">
-                            <div class="card-header"><h5 class="mb-0"><i class="fas fa-chart-pie me-2"></i>Spending by Category</h5></div>
+                            <div class="card-header">
+                                <h5 class="mb-0"><i class="fas fa-chart-pie me-2"></i>Spending by Category</h5>
+                            </div>
                             <div class="card-body">
-                                <canvas id="expenseChart" style="max-height: 300px;"></canvas>
+                                <div class="chart-container">
+                                    <canvas id="expenseChart"></canvas>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -167,34 +504,76 @@
 
             <!-- ADMIN DASHBOARD TAB -->
             <div class="tab-pane fade" id="pills-admin">
-                <div class="card">
-                    <div class="card-header"><h5 class="mb-0"><i class="fas fa-chart-line me-2"></i>Executive Overview (All Employees)</h5></div>
-                    <div class="card-body">
-                        <div class="row g-3 mb-4">
-                            <div class="col-md-4">
-                                <div class="p-3 bg-light rounded text-center">
-                                    <h3 class="text-primary" id="adminTotalExpenses">₹0.00</h3>
-                                    <small class="text-muted">Total Company Spend</small>
-                                </div>
-                            </div>
-                            <div class="col-md-4">
-                                <div class="p-3 bg-light rounded text-center">
-                                    <h3 class="text-warning" id="adminPendingCount">0</h3>
-                                    <small class="text-muted">Pending Approvals</small>
-                                </div>
-                            </div>
-                            <div class="col-md-4">
-                                <div class="p-3 bg-light rounded text-center">
-                                    <h3 class="text-success" id="adminProcessedCount">0</h3>
-                                    <small class="text-muted">Processed This Month</small>
-                                </div>
-                            </div>
+                <div class="row g-3 mb-4">
+                    <div class="col-md-4">
+                        <div class="summary-card">
+                            <i class="fas fa-rupee-sign fa-2x text-primary"></i>
+                            <h3 id="adminTotalExpenses">₹0.00</h3>
+                            <p>Total Company Spend</p>
                         </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="summary-card">
+                            <i class="fas fa-clock fa-2x text-warning"></i>
+                            <h3 id="adminPendingCount" class="text-warning">0</h3>
+                            <p>Pending Approvals</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="summary-card">
+                            <i class="fas fa-check-circle fa-2x text-success"></i>
+                            <h3 id="adminProcessedCount" class="text-success">0</h3>
+                            <p>Processed This Month</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="fas fa-users me-2"></i>Employee-wise Summary</h5>
+                    </div>
+                    <div class="card-body p-0">
                         <div class="table-responsive">
-                            <table class="table table-striped">
-                                <thead><tr><th>Employee</th><th>Total Claimed</th><th>Total Approved</th></tr></thead>
+                            <table class="table table-striped mb-0">
+                                <thead>
+                                    <tr>
+                                        <th>Employee</th>
+                                        <th>Total Claimed</th>
+                                        <th>Total Approved</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
                                 <tbody id="adminTableBody"></tbody>
                             </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ACCOUNTS PORTAL TAB -->
+            <div class="tab-pane fade" id="pills-accounts">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="fas fa-money-check-alt me-2"></i>Accounts Processing Portal</h5>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-hover mb-0">
+                                <thead>
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>Employee</th>
+                                        <th>Category</th>
+                                        <th>Amount</th>
+                                        <th>Manager Status</th>
+                                        <th>Accounts Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="accountsTableBody"></tbody>
+                            </table>
+                        </div>
+                        <div id="noAccountsData" class="text-center text-muted py-5" style="display:none;">
+                            <i class="fas fa-inbox fa-3x mb-3"></i>
+                            <p>No expenses pending accounts processing.</p>
                         </div>
                     </div>
                 </div>
@@ -209,13 +588,13 @@
         import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
         const firebaseConfig = {
-          apiKey: "AIzaSyCX3d2hhBwb-sdZ1lYEZuwk_Nht7R9JgmM",
-          authDomain: "enterpriseexpense-844d4.firebaseapp.com",
-          projectId: "enterpriseexpense-844d4",
-          storageBucket: "enterpriseexpense-844d4.firebasestorage.app",
-          messagingSenderId: "7537399431",
-          appId: "1:7537399431:web:c38a9ea2e7b941b07a4a22",
-          measurementId: "G-LK1YDR7XJ7"
+            apiKey: "AIzaSyApd9DjctdRjfUarmwzQyOEQYxvOfGlapI",
+            authDomain: "expense-tracker-a2026.firebaseapp.com",
+            projectId: "expense-tracker-a2026",
+            storageBucket: "expense-tracker-a2026.firebasestorage.app",
+            messagingSenderId: "194900105334",
+            appId: "1:194900105334:web:90f88de98384e2d3b16757",
+            measurementId: "G-JYW0V6CPYP"
         };
 
         const app = initializeApp(firebaseConfig);
@@ -230,31 +609,37 @@
         let unsubscribe = null;
         let myChart = null;
 
-        // --- AUTH & USER MANAGEMENT ---
+        // --- AUTH FUNCTIONS ---
         window.switchAuthTab = function(tab) {
-            document.getElementById('tabLogin').className = tab === 'login' ? 'flex-fill text-center pb-2 border-bottom border-3 border-primary' : 'flex-fill text-center pb-2';
-            document.getElementById('tabLogin').style.color = tab === 'login' ? '#1e3c72' : '#6c757d';
-            document.getElementById('tabSignup').className = tab === 'signup' ? 'flex-fill text-center pb-2 border-bottom border-3 border-primary' : 'flex-fill text-center pb-2';
-            document.getElementById('tabSignup').style.color = tab === 'signup' ? '#1e3c72' : '#6c757d';
+            document.getElementById('tabLogin').className = tab === 'login' ? 'auth-tab active' : 'auth-tab';
+            document.getElementById('tabSignup').className = tab === 'signup' ? 'auth-tab active' : 'auth-tab';
             document.getElementById('loginForm').style.display = tab === 'login' ? 'block' : 'none';
             document.getElementById('signupForm').style.display = tab === 'signup' ? 'block' : 'none';
             document.getElementById('authError').style.display = 'none';
         }
 
         window.signupUser = async function() {
-            const name = document.getElementById('signupName').value;
-            const email = document.getElementById('signupEmail').value;
+            const name = document.getElementById('signupName').value.trim();
+            const email = document.getElementById('signupEmail').value.trim();
             const password = document.getElementById('signupPassword').value;
             const role = document.getElementById('signupRole').value;
+
+            if (!name || !email || !password) {
+                document.getElementById('authError').textContent = 'Please fill all fields';
+                document.getElementById('authError').style.display = 'block';
+                return;
+            }
+
             try {
                 const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-                // Save user profile to Firestore
                 await setDoc(doc(usersCollection, userCredential.user.uid), {
                     name: name,
                     email: email,
                     role: role,
-                    createdAt: new Date()
+                    createdAt: new Date().toISOString()
                 });
+                alert('Account created successfully! Please login.');
+                window.switchAuthTab('login');
             } catch (error) {
                 document.getElementById('authError').textContent = error.message;
                 document.getElementById('authError').style.display = 'block';
@@ -262,8 +647,9 @@
         }
 
         window.loginUser = async function() {
-            const email = document.getElementById('loginEmail').value;
+            const email = document.getElementById('loginEmail').value.trim();
             const password = document.getElementById('loginPassword').value;
+
             try {
                 await signInWithEmailAndPassword(auth, email, password);
             } catch (error) {
@@ -276,15 +662,22 @@
             await signOut(auth);
         }
 
+        // --- AUTH STATE LISTENER ---
         onAuthStateChanged(auth, async (user) => {
             if (user) {
                 currentUser = user;
-                // Fetch user role
-                const userDoc = await getDocs(query(usersCollection, where("email", "==", user.email)));
-                if (!userDoc.empty) {
-                    currentUserData = userDoc.docs[0].data();
-                } else {
-                    currentUserData = { role: 'mis', name: 'Unknown' }; // Fallback
+                
+                // Fetch user role from Firestore
+                try {
+                    const userDoc = await getDocs(query(usersCollection, where("email", "==", user.email)));
+                    if (!userDoc.empty) {
+                        currentUserData = userDoc.docs[0].data();
+                    } else {
+                        currentUserData = { role: 'mis', name: 'Unknown' };
+                    }
+                } catch (error) {
+                    console.error('Error fetching user data:', error);
+                    currentUserData = { role: 'mis', name: 'Unknown' };
                 }
 
                 document.getElementById('authScreen').style.display = 'none';
@@ -293,12 +686,19 @@
                 document.getElementById('userRoleDisplay').textContent = `Role: ${currentUserData.role.toUpperCase()}`;
                 document.getElementById('date').valueAsDate = new Date();
 
-                // Show/Hide elements based on role
+                // Show/hide elements based on role
+                document.querySelectorAll('.mis-only').forEach(el => el.style.display = 'none');
+                document.querySelectorAll('.admin-only').forEach(el => el.style.display = 'none');
+                document.querySelectorAll('.accounts-only').forEach(el => el.style.display = 'none');
+
                 if (currentUserData.role === 'mis') {
                     document.querySelectorAll('.mis-only').forEach(el => el.style.display = 'block');
                 }
                 if (currentUserData.role === 'admin') {
                     document.querySelectorAll('.admin-only').forEach(el => el.style.display = 'block');
+                }
+                if (currentUserData.role === 'accounts') {
+                    document.querySelectorAll('.accounts-only').forEach(el => el.style.display = 'block');
                 }
 
                 startRealtimeListener();
@@ -313,10 +713,7 @@
 
         function startRealtimeListener() {
             if (unsubscribe) unsubscribe();
-            let q;
-            // Admin sees everything, others see based on logic (simplified for prototype: everyone sees all, but actions are restricted by role)
-            // In production, use: where("department", "==", currentUserData.department) for managers
-            q = query(expensesCollection, orderBy("date", "desc"));
+            const q = query(expensesCollection, orderBy("date", "desc"));
             
             unsubscribe = onSnapshot(q, (snapshot) => {
                 expenses = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
@@ -324,13 +721,17 @@
                 if (currentUserData && currentUserData.role === 'admin') {
                     renderAdminDashboard();
                 }
+                if (currentUserData && currentUserData.role === 'accounts') {
+                    renderAccountsPortal();
+                }
             });
         }
 
-        // --- CORE LOGIC ---
+        // --- ADD EXPENSE ---
         document.getElementById('expenseForm').addEventListener('submit', async function(e) {
             e.preventDefault();
             if (!currentUser) return;
+            
             const btn = document.getElementById('submitBtn');
             btn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Saving...';
             btn.disabled = true;
@@ -343,11 +744,12 @@
                     description: document.getElementById('description').value,
                     amount: parseFloat(document.getElementById('amount').value),
                     date: document.getElementById('date').value,
-                    status: 'pending_manager', // Workflow starts here
+                    status: 'pending_manager',
                     history: [{ action: 'Submitted', by: currentUser.email, date: new Date().toISOString() }]
                 });
                 e.target.reset();
                 document.getElementById('date').valueAsDate = new Date();
+                alert('Expense submitted successfully!');
             } catch (error) {
                 alert("Error saving: " + error.message);
             }
@@ -355,29 +757,37 @@
             btn.disabled = false;
         });
 
-        window.updateExpenseStatus = async function(id, newStatus, comment = "") {
-            if (!confirm(`Are you sure you want to mark this as ${newStatus.replace('_', ' ')}?`)) return;
+        // --- UPDATE STATUS ---
+        window.updateExpenseStatus = async function(id, newStatus) {
+            if (!confirm(`Are you sure you want to mark this as "${newStatus.replace(/_/g, ' ').toUpperCase()}"?`)) return;
             
             try {
                 const expRef = doc(db, "expenses", id);
                 const expData = expenses.find(e => e.id === id);
-                const newHistory = [...(expData.history || []), { action: newStatus, by: currentUser.email, date: new Date().toISOString(), comment: comment }];
+                const newHistory = [...(expData.history || []), { 
+                    action: newStatus, 
+                    by: currentUser.email, 
+                    date: new Date().toISOString() 
+                }];
                 
                 await updateDoc(expRef, {
                     status: newStatus,
                     history: newHistory
                 });
+                alert('Status updated successfully!');
             } catch (error) {
                 alert("Error updating: " + error.message);
             }
         }
 
+        // --- RENDER MAIN APP ---
         function renderApp() {
             const tbody = document.getElementById('expenseTableBody');
             tbody.innerHTML = '';
             
             if (expenses.length === 0) {
                 document.getElementById('noExpenses').style.display = 'block';
+                updateChart();
                 return;
             }
             document.getElementById('noExpenses').style.display = 'none';
@@ -387,22 +797,40 @@
                 const statusClass = `status-${exp.status}`;
                 const statusText = exp.status.replace(/_/g, ' ').toUpperCase();
 
-                // Role-based Action Buttons
+                // Manager: Approve/Reject for pending_manager
                 if (currentUserData.role === 'manager' && exp.status === 'pending_manager') {
                     actionButtons = `
-                        <button class="btn btn-sm btn-success me-1" onclick="window.updateExpenseStatus('${exp.id}', 'approved_manager')"><i class="fas fa-check"></i></button>
-                        <button class="btn btn-sm btn-danger" onclick="window.updateExpenseStatus('${exp.id}', 'rejected')"><i class="fas fa-times"></i></button>
+                        <button class="btn btn-action btn-approve" onclick="window.updateExpenseStatus('${exp.id}', 'approved_manager')">
+                            <i class="fas fa-check"></i> Approve
+                        </button>
+                        <button class="btn btn-action btn-reject" onclick="window.updateExpenseStatus('${exp.id}', 'rejected')">
+                            <i class="fas fa-times"></i> Reject
+                        </button>
                     `;
-                } else if (currentUserData.role === 'accounts' && exp.status === 'approved_manager') {
-                    actionButtons = `<button class="btn btn-sm btn-primary" onclick="window.updateExpenseStatus('${exp.id}', 'processed')"><i class="fas fa-money-bill-wave"></i> Process</button>`;
-                } else {
-                    actionButtons = `<span class="text-muted small">No action required</span>`;
+                }
+                // Admin: Can approve/reject at any stage
+                else if (currentUserData.role === 'admin' && (exp.status === 'pending_manager' || exp.status === 'approved_manager')) {
+                    actionButtons = `
+                        <button class="btn btn-action btn-approve" onclick="window.updateExpenseStatus('${exp.id}', 'approved_manager')">
+                            <i class="fas fa-check"></i> Approve
+                        </button>
+                        <button class="btn btn-action btn-reject" onclick="window.updateExpenseStatus('${exp.id}', 'rejected')">
+                            <i class="fas fa-times"></i> Reject
+                        </button>
+                    `;
+                }
+                // MIS: Can see but no action (unless they want to delete their own)
+                else if (currentUserData.role === 'mis' && exp.status === 'pending_manager' && exp.submittedBy === currentUser.email) {
+                    actionButtons = `<span class="text-muted small">Awaiting approval</span>`;
+                }
+                else {
+                    actionButtons = `<span class="text-muted small">-</span>`;
                 }
 
                 const row = document.createElement('tr');
                 row.innerHTML = `
                     <td>${exp.date}</td>
-                    <td><strong>${exp.employeeName}</strong><br><small class="text-muted">By: ${exp.submittedBy}</small></td>
+                    <td><strong>${exp.employeeName}</strong><br><small class="text-muted">${exp.submittedBy}</small></td>
                     <td>${exp.category}<br><small class="text-muted">${exp.description}</small></td>
                     <td class="fw-bold">₹${exp.amount.toLocaleString('en-IN', {minimumFractionDigits: 2})}</td>
                     <td><span class="status-badge ${statusClass}">${statusText}</span></td>
@@ -413,6 +841,7 @@
             updateChart();
         }
 
+        // --- RENDER ADMIN DASHBOARD ---
         function renderAdminDashboard() {
             let totalSpend = 0;
             let pendingCount = 0;
@@ -442,17 +871,58 @@
             for (const [emp, stats] of Object.entries(employeeStats)) {
                 adminTbody.innerHTML += `
                     <tr>
-                        <td>${emp}</td>
+                        <td><strong>${emp}</strong></td>
                         <td>₹${stats.claimed.toLocaleString('en-IN', {minimumFractionDigits: 2})}</td>
                         <td class="text-success fw-bold">₹${stats.approved.toLocaleString('en-IN', {minimumFractionDigits: 2})}</td>
+                        <td><span class="badge bg-primary">${stats.approved > 0 ? 'Active' : 'Pending'}</span></td>
                     </tr>
                 `;
             }
         }
 
+        // --- RENDER ACCOUNTS PORTAL ---
+        function renderAccountsPortal() {
+            const tbody = document.getElementById('accountsTableBody');
+            tbody.innerHTML = '';
+
+            // Filter: Show only manager-approved expenses
+            const accountsExpenses = expenses.filter(exp => exp.status === 'approved_manager');
+
+            if (accountsExpenses.length === 0) {
+                document.getElementById('noAccountsData').style.display = 'block';
+                return;
+            }
+            document.getElementById('noAccountsData').style.display = 'none';
+
+            accountsExpenses.forEach((exp) => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${exp.date}</td>
+                    <td><strong>${exp.employeeName}</strong><br><small class="text-muted">${exp.submittedBy}</small></td>
+                    <td>${exp.category}<br><small class="text-muted">${exp.description}</small></td>
+                    <td class="fw-bold">${exp.amount.toLocaleString('en-IN', {minimumFractionDigits: 2})}</td>
+                    <td><span class="status-badge status-approved_manager">APPROVED BY MANAGER</span></td>
+                    <td>
+                        <button class="btn btn-action btn-process" onclick="window.updateExpenseStatus('${exp.id}', 'processed')">
+                            <i class="fas fa-money-bill-wave"></i> Paid
+                        </button>
+                        <button class="btn btn-action btn-hold" onclick="window.updateExpenseStatus('${exp.id}', 'on_hold')">
+                            <i class="fas fa-pause"></i> Hold
+                        </button>
+                        <button class="btn btn-action btn-reject" onclick="window.updateExpenseStatus('${exp.id}', 'rejected')">
+                            <i class="fas fa-times"></i> Reject
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        // --- CHART ---
         function updateChart() {
             const ctx = document.getElementById('expenseChart').getContext('2d');
             const categories = {};
+            
             expenses.forEach(exp => {
                 if (exp.status === 'processed' || exp.status === 'approved_manager') {
                     categories[exp.category] = (categories[exp.category] || 0) + exp.amount;
@@ -467,12 +937,18 @@
                         labels: Object.keys(categories),
                         datasets: [{
                             data: Object.values(categories),
-                            backgroundColor: ['#1e3c72', '#2a5298', '#4facfe', '#00f2fe', '#43e97b'],
+                            backgroundColor: ['#1e3c72', '#2a5298', '#4facfe', '#00f2fe', '#43e97b', '#fa709a'],
                             borderWidth: 2,
                             borderColor: '#ffffff'
                         }]
                     },
-                    options: { responsive: true, maintainAspectRatio: false }
+                    options: { 
+                        responsive: true, 
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { position: 'bottom', labels: { boxWidth: 12, padding: 10 } }
+                        }
+                    }
                 });
             }
         }
